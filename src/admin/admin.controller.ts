@@ -28,9 +28,7 @@ interface UpdateSettingsDto {
 @Controller('admin-rdo')
 @UseGuards(AuthGuard)
 export class AdminController {
-  constructor(
-    private readonly adminService: AdminService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('dashboard')
   async dashboard(@Query() query: any) {
@@ -43,17 +41,10 @@ export class AdminController {
   }
 
   @Get('votos/export.csv')
-  async exportVotesCsv(
-    @Query() query: any,
-    @Res() response: Response,
-  ) {
-    const csv =
-      await this.adminService.generateVotesCsv(query);
+  async exportVotesCsv(@Query() query: any, @Res() response: Response) {
+    const csv = await this.adminService.generateVotesCsv(query);
 
-    response.setHeader(
-      'Content-Type',
-      'text/csv; charset=utf-8',
-    );
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
 
     response.setHeader(
       'Content-Disposition',
@@ -64,12 +55,8 @@ export class AdminController {
   }
 
   @Get('votos/export.xls')
-  async exportVotesExcel(
-    @Query() query: any,
-    @Res() response: Response,
-  ) {
-    const excel =
-      await this.adminService.generateVotesExcel(query);
+  async exportVotesExcel(@Query() query: any, @Res() response: Response) {
+    const excel = await this.adminService.generateVotesExcel(query);
 
     response.setHeader(
       'Content-Type',
@@ -90,11 +77,8 @@ export class AdminController {
   }
 
   @Put('settings')
-  async updateSettings(
-    @Body() body: UpdateSettingsDto,
-  ) {
-    const settings =
-      await this.adminService.updateSettings(body);
+  async updateSettings(@Body() body: UpdateSettingsDto) {
+    const settings = await this.adminService.updateSettings(body);
 
     return {
       status: 'sucesso',

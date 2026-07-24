@@ -37,6 +37,13 @@ interface VoteRow {
   data_hora: Date | string;
 }
 
+export type ListVotesResponse = {
+  result: VoteRow[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
 @Injectable()
 export class AdminService {
   constructor(private readonly mysqlService: MysqlService) {}
@@ -279,118 +286,123 @@ export class AdminService {
     `;
   }
 
-  async listVotes(filters: any = {}): Promise<any[]> {
+  async listVotes(filters: any = {}): Promise<ListVotesResponse> {
     const limit = this.normalizeLimit(filters.limit, 100);
     const offset = this.normalizeOffset(filters.offset);
     const built = this.buildWhere(filters);
 
-    const [rows]: any = await this.mysqlService.query(
-      `
+    const parametrosFiltros = built.params ?? [];
+
+    const [rowsResult, countResult]: any = await Promise.all([
+      this.mysqlService.query(
+        `
         SELECT *
         FROM (${this.unionVotesSql()}) votos
         ${built.clause}
         ORDER BY data_hora DESC
         LIMIT ? OFFSET ?
       `,
-      [...built.params, limit, offset],
-    );
+        [...parametrosFiltros, limit, offset],
+      ),
 
-    return rows as VoteRow[];
+      this.mysqlService.query(
+        `
+        SELECT COUNT(*) AS total
+        FROM (${this.unionVotesSql()}) votos
+        ${built.clause}
+        `,
+        parametrosFiltros,
+      ),
+    ]);
+
+    // const rows = rowsResult?.[0] ?? [];
+    const countRows = countResult?.[0] ?? [];
+
+    return {
+      result: rowsResult as VoteRow[],
+      total: Number(countRows.total ?? 0),
+      limit,
+      offset,
+    };
   }
 
   async getDashboard(filters: any = {}) {
-    const built = this.buildWhere(filters);
+    const votos = await this.findAllVotesForDashboard(filters);
 
-    const base = `
-      FROM (${this.unionVotesSql()}) votos
-      ${built.clause}
-    `;
+    const totalVotos = votos.length;
 
-    const [totalsRows]: any = await this.mysqlService.query(
-      `
-        SELECT
-          COUNT(*) AS totalVotos,
-          COALESCE(SUM(pontos), 0) AS totalPontos,
-          SUM(
-            CASE WHEN origem = 'interno' THEN 1 ELSE 0 END
-          ) AS votosInternos,
-          SUM(
-            CASE WHEN origem = 'externo' THEN 1 ELSE 0 END
-          ) AS votosExternos
-        ${base}
-      `,
-      built.params,
+    const totalPontos = votos.reduce(
+      (total, voto) => total + Number(voto.pontos || 0),
+      0,
     );
 
-    const getRanking = async (rankingFilters: any) => {
-      const rankingBuilt = this.buildWhere(rankingFilters);
+    const votosInternos = votos.filter(
+      (voto) => voto.origem === 'interno',
+    ).length;
 
-      const [rows]: any = await this.mysqlService.query(
-        `
-          SELECT
-            origem,
-            avaliado,
-            identificador,
-            COUNT(*) AS totalVotos,
-            COALESCE(SUM(pontos), 0) AS totalPontos
-          FROM (${this.unionVotesSql()}) votos
-          ${rankingBuilt.clause}
-          GROUP BY origem, avaliado, identificador
-          ORDER BY
-            totalPontos DESC,
-            totalVotos DESC,
-            avaliado ASC
-          LIMIT 5
-        `,
-        rankingBuilt.params,
-      );
+    const votosExternos = votos.filter(
+      (voto) => voto.origem === 'externo',
+    ).length;
 
-      return rows;
-    };
+    const rankingGeral = this.buildRanking(votos);
 
-    const [rankingGeral, rankingInterno, rankingExterno] = await Promise.all([
-      getRanking(filters),
-      getRanking({
-        ...filters,
-        tipo: 'interno',
-      }),
-      getRanking({
-        ...filters,
-        tipo: 'externo',
-      }),
-    ]);
-
-    const locationCondition = built.clause ? 'AND' : 'WHERE';
-
-    const [locations]: any = await this.mysqlService.query(
-      `
-        SELECT
-          origem,
-          avaliado,
-          identificador,
-          latitude,
-          longitude,
-          cidade,
-          estado,
-          data_hora
-        ${base}
-        ${locationCondition}
-          latitude IS NOT NULL
-          AND longitude IS NOT NULL
-        ORDER BY data_hora DESC
-        LIMIT 250
-      `,
-      built.params,
+    const rankingInterno = this.buildRanking(
+      votos.filter((voto) => voto.origem === 'interno'),
     );
+
+    const rankingExterno = this.buildRanking(
+      votos.filter((voto) => voto.origem === 'externo'),
+    );
+
+    const locations = votos
+      .filter((voto) => {
+        const latitude = Number(voto.latitude);
+        const longitude = Number(voto.longitude);
+
+        return (
+          voto.latitude !== null &&
+          voto.latitude !== undefined &&
+          voto.longitude !== null &&
+          voto.longitude !== undefined &&
+          Number.isFinite(latitude) &&
+          Number.isFinite(longitude)
+        );
+      })
+      .sort((a, b) => {
+        const dataA = new Date(a.data_hora).getTime();
+        const dataB = new Date(b.data_hora).getTime();
+
+        return dataB - dataA;
+      })
+      .slice(0, 250)
+      .map((voto) => ({
+        origem: voto.origem,
+        avaliado: voto.avaliado,
+        identificador: voto.identificador,
+        latitude: voto.latitude,
+        longitude: voto.longitude,
+        maps_link: voto.maps_link ?? null,
+        cidade: voto.cidade,
+        estado: voto.estado,
+        data_hora: voto.data_hora,
+      }));
 
     return {
-      totals: totalsRows?.[0] || {},
+      totals: {
+        totalVotos,
+        totalPontos,
+        votosInternos,
+        votosExternos,
+      },
+
       ranking: rankingGeral,
+
       rankings: {
         geral: rankingGeral,
         interno: rankingInterno,
         externo: rankingExterno,
       },
+
       locations,
     };
   }
@@ -415,7 +427,7 @@ export class AdminService {
   }
 
   async generateVotesCsv(filters: any = {}): Promise<string> {
-    const rows = await this.listVotes({
+    const { result: rows } = await this.listVotes({
       ...filters,
       limit: 1000,
       offset: 0,
@@ -448,7 +460,7 @@ export class AdminService {
   }
 
   async generateVotesExcel(filters: any = {}): Promise<string> {
-    const rows = await this.listVotes({
+    const { result: rows } = await this.listVotes({
       ...filters,
       limit: 1000,
       offset: 0,
@@ -513,5 +525,91 @@ export class AdminService {
           </table>
         </body>
       </html>`;
+  }
+
+  private async findAllVotesForDashboard(
+    filters: any = {},
+  ): Promise<VoteRow[]> {
+    const limit = 1000;
+    let offset = 0;
+    let total = 0;
+
+    const votos: VoteRow[] = [];
+
+    do {
+      const response = await this.listVotes({
+        ...filters,
+        limit,
+        offset,
+      });
+
+      const result = Array.isArray(response.result) ? response.result : [];
+
+      votos.push(...result);
+
+      total = Number(response.total || 0);
+      offset += limit;
+    } while (votos.length < total);
+
+    return votos;
+  }
+
+  private buildRanking(votos: VoteRow[]) {
+    const agrupados = new Map<
+      string,
+      {
+        origem: 'interno' | 'externo';
+        avaliado: string | null;
+        identificador: string | null;
+        totalVotos: number;
+        totalPontos: number;
+      }
+    >();
+
+    for (const voto of votos) {
+      const origem = voto.origem;
+      const avaliado = voto.avaliado?.trim() || null;
+      const identificador = voto.identificador?.trim() || null;
+
+      const chave = [
+        origem,
+        avaliado?.toLowerCase() || '',
+        identificador?.toLowerCase() || '',
+      ].join('|');
+
+      const existente = agrupados.get(chave);
+
+      if (existente) {
+        existente.totalVotos += 1;
+        existente.totalPontos += Number(voto.pontos || 0);
+
+        continue;
+      }
+
+      agrupados.set(chave, {
+        origem,
+        avaliado,
+        identificador,
+        totalVotos: 1,
+        totalPontos: Number(voto.pontos || 0),
+      });
+    }
+
+    return Array.from(agrupados.values())
+      .sort((a, b) => {
+        if (b.totalPontos !== a.totalPontos) {
+          return b.totalPontos - a.totalPontos;
+        }
+
+        if (b.totalVotos !== a.totalVotos) {
+          return b.totalVotos - a.totalVotos;
+        }
+
+        return String(a.avaliado || '').localeCompare(
+          String(b.avaliado || ''),
+          'pt-BR',
+        );
+      })
+      .slice(0, 5);
   }
 }
