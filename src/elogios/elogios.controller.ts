@@ -16,7 +16,7 @@ export class ElogiosController {
     private readonly elogiosService: ElogiosService,
   ) {}
 
-  @Post('elogio')
+  @Post('elogio-externo')
   criarElogioPublico(
     @Headers('x-avaliador-token')
     tokenAvaliador: string | undefined,

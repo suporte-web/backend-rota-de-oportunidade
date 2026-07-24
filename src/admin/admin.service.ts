@@ -1,13 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { MysqlParam, MysqlService } from '../database/mysql/mysql.service';
-
-const DEFAULT_SETTINGS = {
-  weights: {
-    interno: 2,
-    gestao: 2,
-    externo: 2,
-  },
-};
 
 interface UpdateSettingsDto {
   pontosExterno?: number;
@@ -42,6 +34,12 @@ export type ListVotesResponse = {
   total: number;
   limit: number;
   offset: number;
+};
+
+const defaultWeights = {
+  interno: 0,
+  gestao: 0,
+  externo: 0,
 };
 
 @Injectable()
@@ -101,38 +99,50 @@ export class AdminService {
         INSERT IGNORE INTO settings (\`key\`, \`value\`)
         VALUES (?, ?)
       `,
-      ['weights', JSON.stringify(DEFAULT_SETTINGS.weights)],
+      ['weights', JSON.stringify(defaultWeights)],
     );
   }
 
   async getSettings() {
     await this.ensureAdminTables();
 
-    const [rows]: any = await this.mysqlService.query(
+    const row: any = await this.mysqlService.query(
       `
-        SELECT \`key\`, \`value\`
-        FROM settings
-        WHERE \`key\` = ?
-        LIMIT 1
-      `,
+      SELECT \`key\`, \`value\`
+      FROM settings
+      WHERE \`key\` = ?
+      LIMIT 1
+    `,
       ['weights'],
     );
 
-    let weights = {
-      ...DEFAULT_SETTINGS.weights,
-    };
+    let weights = { ...defaultWeights };
 
     try {
-      const parsed = JSON.parse(rows?.[0]?.value || '{}');
+      const value = row?.[0]?.value;
+
+      const parsed =
+        typeof value === 'string' ? JSON.parse(value || '{}') : value || {};
+
+      const interno = Number(parsed.interno);
+      const gestao = Number(parsed.gestao);
+      const externo = Number(parsed.externo);
 
       weights = {
-        interno: Number(parsed.interno) || DEFAULT_SETTINGS.weights.interno,
-        gestao: Number(parsed.gestao) || DEFAULT_SETTINGS.weights.gestao,
-        externo: Number(parsed.externo) || DEFAULT_SETTINGS.weights.externo,
+        interno: Number.isFinite(interno) ? interno : defaultWeights.interno,
+
+        gestao: Number.isFinite(gestao) ? gestao : defaultWeights.gestao,
+
+        externo: Number.isFinite(externo) ? externo : defaultWeights.externo,
       };
-    } catch {
+    } catch (error) {
+      Logger.error(
+        'Erro ao interpretar as configurações de pontuação',
+        error instanceof Error ? error.stack : String(error),
+      );
+
       weights = {
-        ...DEFAULT_SETTINGS.weights,
+        ...defaultWeights,
       };
     }
 
@@ -147,55 +157,75 @@ export class AdminService {
   async updateSettings(data: UpdateSettingsDto) {
     await this.ensureAdminTables();
 
-    const pontosExterno = Math.max(
-      0,
-      Math.trunc(Number(data.pontosExterno ?? data.weights?.externo)),
-    );
+    const settingsAtuais = await this.getSettings();
 
-    const pontosInterno = Math.max(
-      0,
-      Math.trunc(Number(data.pontosInterno ?? data.weights?.interno)),
-    );
+    const externoRecebido =
+      data.pontosExterno ??
+      data.weights?.externo ??
+      settingsAtuais.weights.externo;
 
-    const pontosGestao = Math.max(
-      0,
-      Math.trunc(
-        Number(
-          data.pontosGestao ??
-            data.weights?.gestao ??
-            DEFAULT_SETTINGS.weights.gestao,
-        ),
-      ),
-    );
+    const internoRecebido =
+      data.pontosInterno ??
+      data.weights?.interno ??
+      settingsAtuais.weights.interno;
+
+    const gestaoRecebido =
+      data.pontosGestao ??
+      data.weights?.gestao ??
+      settingsAtuais.weights.gestao;
+
+    const externo = Number(externoRecebido);
+    const interno = Number(internoRecebido);
+    const gestao = Number(gestaoRecebido);
 
     if (
-      !Number.isFinite(pontosExterno) ||
-      !Number.isFinite(pontosInterno) ||
-      !Number.isFinite(pontosGestao)
+      !Number.isFinite(externo) ||
+      !Number.isFinite(interno) ||
+      !Number.isFinite(gestao)
     ) {
-      throw new BadRequestException({
-        status: 'erro',
-        mensagem: 'Pontuação inválida.',
-      });
+      throw new BadRequestException(
+        'Todas as pontuações devem ser números válidos.',
+      );
+    }
+
+    if (externo < 0 || interno < 0 || gestao < 0) {
+      throw new BadRequestException('As pontuações não podem ser negativas.');
     }
 
     const weights = {
-      interno: pontosInterno,
-      gestao: pontosGestao,
-      externo: pontosExterno,
+      interno: Math.trunc(interno),
+      gestao: Math.trunc(gestao),
+      externo: Math.trunc(externo),
     };
 
-    await this.mysqlService.query(
+    const result = await this.mysqlService.query(
       `
-        INSERT INTO settings (\`key\`, \`value\`)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE
-          \`value\` = VALUES(\`value\`)
-      `,
+    INSERT INTO settings (\`key\`, \`value\`)
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE
+      \`value\` = VALUES(\`value\`)
+  `,
       ['weights', JSON.stringify(weights)],
     );
 
-    return this.getSettings();
+    console.log(result);
+
+    Logger.log(
+      `Configurações atualizadas: ${JSON.stringify(weights)}`,
+      AdminService.name,
+    );
+
+    Logger.debug(
+      `Resultado do MySQL: ${JSON.stringify(result)}`,
+      AdminService.name,
+    );
+
+    return {
+      weights,
+      pontosExterno: weights.externo,
+      pontosInterno: weights.interno,
+      pontosGestao: weights.gestao,
+    };
   }
 
   private buildWhere(filters: any = {}): {

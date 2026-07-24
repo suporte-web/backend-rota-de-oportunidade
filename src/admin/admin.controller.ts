@@ -78,11 +78,6 @@ export class AdminController {
 
   @Put('settings')
   async updateSettings(@Body() body: UpdateSettingsDto) {
-    const settings = await this.adminService.updateSettings(body);
-
-    return {
-      status: 'sucesso',
-      settings,
-    };
+    return await this.adminService.updateSettings(body);
   }
 }
