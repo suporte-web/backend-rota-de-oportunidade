@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { AdminService } from '../admin/admin.service';
@@ -122,6 +122,48 @@ export class ElogiosService {
     };
   }
 
+  private async hasRecentPublicVote(
+    carreta: string,
+    token: string,
+    limite: Date,
+  ): Promise<boolean> {
+    const vote = await this.prismaService.elogioMotorista.findFirst({
+      where: {
+        carreta,
+        tokenAvaliador: token,
+        dataHora: {
+          gte: limite,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return Boolean(vote);
+  }
+
+  private async hasRecentInternalVote(
+    matricula: string,
+    token: string,
+    limite: Date,
+  ): Promise<boolean> {
+    const vote = await this.prismaService.elogioInterno.findFirst({
+      where: {
+        matricula,
+        tokenAvaliador: token,
+        dataHora: {
+          gte: limite,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return Boolean(vote);
+  }
+
   async criarElogioPublico(data: PublicPraiseData, tokenAvaliador?: string) {
     const token = String(tokenAvaliador || '')
       .trim()
@@ -135,6 +177,24 @@ export class ElogiosService {
       data.cidade,
       data.estado,
     );
+
+    const limite = new Date();
+    limite.setDate(limite.getDate() - 7);
+
+    const carreta = String(data.carreta || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+
+    if (token) {
+      const jaVotou = await this.hasRecentPublicVote(carreta, token, limite);
+
+      if (jaVotou) {
+        throw new BadRequestException(
+          'Você já registrou um elogio para esta carreta nos últimos 7 dias.',
+        );
+      }
+    }
 
     return this.prismaService.elogioMotorista.create({
       data: {
@@ -243,6 +303,23 @@ export class ElogiosService {
       data.cidade,
       data.estado,
     );
+
+    const limite = new Date();
+    limite.setDate(limite.getDate() - 7);
+
+    if (token) {
+      const jaVotou = await this.hasRecentInternalVote(
+        data.matricula,
+        token,
+        limite,
+      );
+
+      if (jaVotou) {
+        throw new BadRequestException(
+          'Você já registrou um elogio para este motorista nos últimos 7 dias.',
+        );
+      }
+    }
 
     return this.prismaService.elogioInterno.create({
       data: {
