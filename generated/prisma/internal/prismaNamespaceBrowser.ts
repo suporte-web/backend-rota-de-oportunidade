@@ -102,6 +102,7 @@ export const ElogioInternoScalarFieldEnum = {
   elogio: 'elogio',
   motorista: 'motorista',
   telefone: 'telefone',
+  autor: 'autor',
   latitude: 'latitude',
   longitude: 'longitude',
   mapsLink: 'mapsLink',

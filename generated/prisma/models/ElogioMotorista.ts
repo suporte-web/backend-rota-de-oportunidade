@@ -280,7 +280,7 @@ export type ElogioMotoristaGroupByOutputType = {
   estado: string | null
   tokenAvaliador: string | null
   dataHora: Date
-  dataRegistro: Date | null
+  dataRegistro: Date
   _count: ElogioMotoristaCountAggregateOutputType | null
   _avg: ElogioMotoristaAvgAggregateOutputType | null
   _sum: ElogioMotoristaSumAggregateOutputType | null
@@ -323,7 +323,7 @@ export type ElogioMotoristaWhereInput = {
   estado?: Prisma.StringNullableFilter<"ElogioMotorista"> | string | null
   tokenAvaliador?: Prisma.StringNullableFilter<"ElogioMotorista"> | string | null
   dataHora?: Prisma.DateTimeFilter<"ElogioMotorista"> | Date | string
-  dataRegistro?: Prisma.DateTimeNullableFilter<"ElogioMotorista"> | Date | string | null
+  dataRegistro?: Prisma.DateTimeFilter<"ElogioMotorista"> | Date | string
 }
 
 export type ElogioMotoristaOrderByWithRelationInput = {
@@ -343,7 +343,7 @@ export type ElogioMotoristaOrderByWithRelationInput = {
   estado?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenAvaliador?: Prisma.SortOrderInput | Prisma.SortOrder
   dataHora?: Prisma.SortOrder
-  dataRegistro?: Prisma.SortOrderInput | Prisma.SortOrder
+  dataRegistro?: Prisma.SortOrder
 }
 
 export type ElogioMotoristaWhereUniqueInput = Prisma.AtLeast<{
@@ -366,7 +366,7 @@ export type ElogioMotoristaWhereUniqueInput = Prisma.AtLeast<{
   estado?: Prisma.StringNullableFilter<"ElogioMotorista"> | string | null
   tokenAvaliador?: Prisma.StringNullableFilter<"ElogioMotorista"> | string | null
   dataHora?: Prisma.DateTimeFilter<"ElogioMotorista"> | Date | string
-  dataRegistro?: Prisma.DateTimeNullableFilter<"ElogioMotorista"> | Date | string | null
+  dataRegistro?: Prisma.DateTimeFilter<"ElogioMotorista"> | Date | string
 }, "id">
 
 export type ElogioMotoristaOrderByWithAggregationInput = {
@@ -386,7 +386,7 @@ export type ElogioMotoristaOrderByWithAggregationInput = {
   estado?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenAvaliador?: Prisma.SortOrderInput | Prisma.SortOrder
   dataHora?: Prisma.SortOrder
-  dataRegistro?: Prisma.SortOrderInput | Prisma.SortOrder
+  dataRegistro?: Prisma.SortOrder
   _count?: Prisma.ElogioMotoristaCountOrderByAggregateInput
   _avg?: Prisma.ElogioMotoristaAvgOrderByAggregateInput
   _max?: Prisma.ElogioMotoristaMaxOrderByAggregateInput
@@ -414,7 +414,7 @@ export type ElogioMotoristaScalarWhereWithAggregatesInput = {
   estado?: Prisma.StringNullableWithAggregatesFilter<"ElogioMotorista"> | string | null
   tokenAvaliador?: Prisma.StringNullableWithAggregatesFilter<"ElogioMotorista"> | string | null
   dataHora?: Prisma.DateTimeWithAggregatesFilter<"ElogioMotorista"> | Date | string
-  dataRegistro?: Prisma.DateTimeNullableWithAggregatesFilter<"ElogioMotorista"> | Date | string | null
+  dataRegistro?: Prisma.DateTimeWithAggregatesFilter<"ElogioMotorista"> | Date | string
 }
 
 export type ElogioMotoristaCreateInput = {
@@ -433,7 +433,7 @@ export type ElogioMotoristaCreateInput = {
   estado?: string | null
   tokenAvaliador?: string | null
   dataHora?: Date | string
-  dataRegistro?: Date | string | null
+  dataRegistro?: Date | string
 }
 
 export type ElogioMotoristaUncheckedCreateInput = {
@@ -453,7 +453,7 @@ export type ElogioMotoristaUncheckedCreateInput = {
   estado?: string | null
   tokenAvaliador?: string | null
   dataHora?: Date | string
-  dataRegistro?: Date | string | null
+  dataRegistro?: Date | string
 }
 
 export type ElogioMotoristaUpdateInput = {
@@ -472,7 +472,7 @@ export type ElogioMotoristaUpdateInput = {
   estado?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenAvaliador?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataHora?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataRegistro?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataRegistro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ElogioMotoristaUncheckedUpdateInput = {
@@ -492,7 +492,7 @@ export type ElogioMotoristaUncheckedUpdateInput = {
   estado?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenAvaliador?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataHora?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataRegistro?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataRegistro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ElogioMotoristaCreateManyInput = {
@@ -512,7 +512,7 @@ export type ElogioMotoristaCreateManyInput = {
   estado?: string | null
   tokenAvaliador?: string | null
   dataHora?: Date | string
-  dataRegistro?: Date | string | null
+  dataRegistro?: Date | string
 }
 
 export type ElogioMotoristaUpdateManyMutationInput = {
@@ -531,7 +531,7 @@ export type ElogioMotoristaUpdateManyMutationInput = {
   estado?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenAvaliador?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataHora?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataRegistro?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataRegistro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ElogioMotoristaUncheckedUpdateManyInput = {
@@ -551,7 +551,7 @@ export type ElogioMotoristaUncheckedUpdateManyInput = {
   estado?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenAvaliador?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dataHora?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataRegistro?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dataRegistro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ElogioMotoristaCountOrderByAggregateInput = {
@@ -654,10 +654,6 @@ export type NullableFloatFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
 }
 
 
@@ -764,7 +760,7 @@ export type $ElogioMotoristaPayload<ExtArgs extends runtime.Types.Extensions.Int
     estado: string | null
     tokenAvaliador: string | null
     dataHora: Date
-    dataRegistro: Date | null
+    dataRegistro: Date
   }, ExtArgs["result"]["elogioMotorista"]>
   composites: {}
 }

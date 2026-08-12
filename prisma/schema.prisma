@@ -36,7 +36,7 @@ model ElogioMotorista {
   estado          String?
   tokenAvaliador  String?
   dataHora        DateTime @default(now())
-  dataRegistro    DateTime? @default(now())
+  dataRegistro    DateTime @default(now())
 
   @@index([carreta, tokenAvaliador, dataHora])
   @@map("elogios_motoristas")
@@ -49,6 +49,7 @@ model ElogioInterno {
   elogio          String
   motorista       String
   telefone        String?
+  autor           String?
   latitude        Float?
   longitude       Float?
   mapsLink        String?

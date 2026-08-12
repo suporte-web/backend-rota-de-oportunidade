@@ -34,6 +34,7 @@ interface InternalPraiseData {
   estado?: string | null;
   dataHora?: string | Date;
   tokenAvaliador: string;
+  autor?: string | null;
 }
 
 interface OccurrenceData {
@@ -270,6 +271,8 @@ export class ElogiosService {
         tipo: 'Interno',
 
         pontos,
+
+        autor: data.autor,
       },
     });
   }

@@ -46,6 +46,7 @@ export type ElogioInternoMinAggregateOutputType = {
   elogio: string | null
   motorista: string | null
   telefone: string | null
+  autor: string | null
   latitude: number | null
   longitude: number | null
   mapsLink: string | null
@@ -63,6 +64,7 @@ export type ElogioInternoMaxAggregateOutputType = {
   elogio: string | null
   motorista: string | null
   telefone: string | null
+  autor: string | null
   latitude: number | null
   longitude: number | null
   mapsLink: string | null
@@ -80,6 +82,7 @@ export type ElogioInternoCountAggregateOutputType = {
   elogio: number
   motorista: number
   telefone: number
+  autor: number
   latitude: number
   longitude: number
   mapsLink: number
@@ -113,6 +116,7 @@ export type ElogioInternoMinAggregateInputType = {
   elogio?: true
   motorista?: true
   telefone?: true
+  autor?: true
   latitude?: true
   longitude?: true
   mapsLink?: true
@@ -130,6 +134,7 @@ export type ElogioInternoMaxAggregateInputType = {
   elogio?: true
   motorista?: true
   telefone?: true
+  autor?: true
   latitude?: true
   longitude?: true
   mapsLink?: true
@@ -147,6 +152,7 @@ export type ElogioInternoCountAggregateInputType = {
   elogio?: true
   motorista?: true
   telefone?: true
+  autor?: true
   latitude?: true
   longitude?: true
   mapsLink?: true
@@ -251,6 +257,7 @@ export type ElogioInternoGroupByOutputType = {
   elogio: string
   motorista: string
   telefone: string | null
+  autor: string | null
   latitude: number | null
   longitude: number | null
   mapsLink: string | null
@@ -291,6 +298,7 @@ export type ElogioInternoWhereInput = {
   elogio?: Prisma.StringFilter<"ElogioInterno"> | string
   motorista?: Prisma.StringFilter<"ElogioInterno"> | string
   telefone?: Prisma.StringNullableFilter<"ElogioInterno"> | string | null
+  autor?: Prisma.StringNullableFilter<"ElogioInterno"> | string | null
   latitude?: Prisma.FloatNullableFilter<"ElogioInterno"> | number | null
   longitude?: Prisma.FloatNullableFilter<"ElogioInterno"> | number | null
   mapsLink?: Prisma.StringNullableFilter<"ElogioInterno"> | string | null
@@ -308,6 +316,7 @@ export type ElogioInternoOrderByWithRelationInput = {
   elogio?: Prisma.SortOrder
   motorista?: Prisma.SortOrder
   telefone?: Prisma.SortOrderInput | Prisma.SortOrder
+  autor?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   mapsLink?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -328,6 +337,7 @@ export type ElogioInternoWhereUniqueInput = Prisma.AtLeast<{
   elogio?: Prisma.StringFilter<"ElogioInterno"> | string
   motorista?: Prisma.StringFilter<"ElogioInterno"> | string
   telefone?: Prisma.StringNullableFilter<"ElogioInterno"> | string | null
+  autor?: Prisma.StringNullableFilter<"ElogioInterno"> | string | null
   latitude?: Prisma.FloatNullableFilter<"ElogioInterno"> | number | null
   longitude?: Prisma.FloatNullableFilter<"ElogioInterno"> | number | null
   mapsLink?: Prisma.StringNullableFilter<"ElogioInterno"> | string | null
@@ -345,6 +355,7 @@ export type ElogioInternoOrderByWithAggregationInput = {
   elogio?: Prisma.SortOrder
   motorista?: Prisma.SortOrder
   telefone?: Prisma.SortOrderInput | Prisma.SortOrder
+  autor?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
   mapsLink?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -370,6 +381,7 @@ export type ElogioInternoScalarWhereWithAggregatesInput = {
   elogio?: Prisma.StringWithAggregatesFilter<"ElogioInterno"> | string
   motorista?: Prisma.StringWithAggregatesFilter<"ElogioInterno"> | string
   telefone?: Prisma.StringNullableWithAggregatesFilter<"ElogioInterno"> | string | null
+  autor?: Prisma.StringNullableWithAggregatesFilter<"ElogioInterno"> | string | null
   latitude?: Prisma.FloatNullableWithAggregatesFilter<"ElogioInterno"> | number | null
   longitude?: Prisma.FloatNullableWithAggregatesFilter<"ElogioInterno"> | number | null
   mapsLink?: Prisma.StringNullableWithAggregatesFilter<"ElogioInterno"> | string | null
@@ -386,6 +398,7 @@ export type ElogioInternoCreateInput = {
   elogio: string
   motorista: string
   telefone?: string | null
+  autor?: string | null
   latitude?: number | null
   longitude?: number | null
   mapsLink?: string | null
@@ -403,6 +416,7 @@ export type ElogioInternoUncheckedCreateInput = {
   elogio: string
   motorista: string
   telefone?: string | null
+  autor?: string | null
   latitude?: number | null
   longitude?: number | null
   mapsLink?: string | null
@@ -419,6 +433,7 @@ export type ElogioInternoUpdateInput = {
   elogio?: Prisma.StringFieldUpdateOperationsInput | string
   motorista?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mapsLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -436,6 +451,7 @@ export type ElogioInternoUncheckedUpdateInput = {
   elogio?: Prisma.StringFieldUpdateOperationsInput | string
   motorista?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mapsLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -453,6 +469,7 @@ export type ElogioInternoCreateManyInput = {
   elogio: string
   motorista: string
   telefone?: string | null
+  autor?: string | null
   latitude?: number | null
   longitude?: number | null
   mapsLink?: string | null
@@ -469,6 +486,7 @@ export type ElogioInternoUpdateManyMutationInput = {
   elogio?: Prisma.StringFieldUpdateOperationsInput | string
   motorista?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mapsLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -486,6 +504,7 @@ export type ElogioInternoUncheckedUpdateManyInput = {
   elogio?: Prisma.StringFieldUpdateOperationsInput | string
   motorista?: Prisma.StringFieldUpdateOperationsInput | string
   telefone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   mapsLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -503,6 +522,7 @@ export type ElogioInternoCountOrderByAggregateInput = {
   elogio?: Prisma.SortOrder
   motorista?: Prisma.SortOrder
   telefone?: Prisma.SortOrder
+  autor?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   mapsLink?: Prisma.SortOrder
@@ -527,6 +547,7 @@ export type ElogioInternoMaxOrderByAggregateInput = {
   elogio?: Prisma.SortOrder
   motorista?: Prisma.SortOrder
   telefone?: Prisma.SortOrder
+  autor?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   mapsLink?: Prisma.SortOrder
@@ -544,6 +565,7 @@ export type ElogioInternoMinOrderByAggregateInput = {
   elogio?: Prisma.SortOrder
   motorista?: Prisma.SortOrder
   telefone?: Prisma.SortOrder
+  autor?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   mapsLink?: Prisma.SortOrder
@@ -570,6 +592,7 @@ export type ElogioInternoSelect<ExtArgs extends runtime.Types.Extensions.Interna
   elogio?: boolean
   motorista?: boolean
   telefone?: boolean
+  autor?: boolean
   latitude?: boolean
   longitude?: boolean
   mapsLink?: boolean
@@ -587,6 +610,7 @@ export type ElogioInternoSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   elogio?: boolean
   motorista?: boolean
   telefone?: boolean
+  autor?: boolean
   latitude?: boolean
   longitude?: boolean
   mapsLink?: boolean
@@ -604,6 +628,7 @@ export type ElogioInternoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   elogio?: boolean
   motorista?: boolean
   telefone?: boolean
+  autor?: boolean
   latitude?: boolean
   longitude?: boolean
   mapsLink?: boolean
@@ -621,6 +646,7 @@ export type ElogioInternoSelectScalar = {
   elogio?: boolean
   motorista?: boolean
   telefone?: boolean
+  autor?: boolean
   latitude?: boolean
   longitude?: boolean
   mapsLink?: boolean
@@ -632,7 +658,7 @@ export type ElogioInternoSelectScalar = {
   pontos?: boolean
 }
 
-export type ElogioInternoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "matricula" | "elogio" | "motorista" | "telefone" | "latitude" | "longitude" | "mapsLink" | "cidade" | "estado" | "dataHora" | "tokenAvaliador" | "tipo" | "pontos", ExtArgs["result"]["elogioInterno"]>
+export type ElogioInternoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "matricula" | "elogio" | "motorista" | "telefone" | "autor" | "latitude" | "longitude" | "mapsLink" | "cidade" | "estado" | "dataHora" | "tokenAvaliador" | "tipo" | "pontos", ExtArgs["result"]["elogioInterno"]>
 
 export type $ElogioInternoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ElogioInterno"
@@ -643,6 +669,7 @@ export type $ElogioInternoPayload<ExtArgs extends runtime.Types.Extensions.Inter
     elogio: string
     motorista: string
     telefone: string | null
+    autor: string | null
     latitude: number | null
     longitude: number | null
     mapsLink: string | null
@@ -1080,6 +1107,7 @@ export interface ElogioInternoFieldRefs {
   readonly elogio: Prisma.FieldRef<"ElogioInterno", 'String'>
   readonly motorista: Prisma.FieldRef<"ElogioInterno", 'String'>
   readonly telefone: Prisma.FieldRef<"ElogioInterno", 'String'>
+  readonly autor: Prisma.FieldRef<"ElogioInterno", 'String'>
   readonly latitude: Prisma.FieldRef<"ElogioInterno", 'Float'>
   readonly longitude: Prisma.FieldRef<"ElogioInterno", 'Float'>
   readonly mapsLink: Prisma.FieldRef<"ElogioInterno", 'String'>

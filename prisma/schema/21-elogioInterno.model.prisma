@@ -4,6 +4,7 @@ model ElogioInterno {
   elogio          String
   motorista       String
   telefone        String?
+  autor           String?
   latitude        Float?
   longitude       Float?
   mapsLink        String?
