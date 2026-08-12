@@ -8,6 +8,7 @@ import { KmmDatabaseModule } from './database/kmm/kmm-database.module';
 import { ConfigModule } from '@nestjs/config';
 import { KmmModule } from './kmm/kmm.module';
 import { PrismaModule } from './database/prisma/prisma.module';
+import { CommonServicesModule } from './common/services/common-services.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PrismaModule } from './database/prisma/prisma.module';
     KmmDatabaseModule,
     KmmModule,
     PrismaModule,
+    CommonServicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
