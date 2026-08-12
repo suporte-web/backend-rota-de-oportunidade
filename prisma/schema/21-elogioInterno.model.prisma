@@ -1,0 +1,19 @@
+model ElogioInterno {
+  id              Int      @id @default(autoincrement())
+  matricula       String
+  elogio          String
+  motorista       String
+  telefone        String?
+  latitude        Float?
+  longitude       Float?
+  mapsLink        String?
+  cidade          String?
+  estado          String?
+  dataHora        DateTime @default(now())
+  tokenAvaliador  String?
+  tipo            String
+  pontos          Int
+
+  @@index([matricula, tokenAvaliador, dataHora])
+  @@map("elogios_internos")
+}

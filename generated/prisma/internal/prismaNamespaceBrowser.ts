@@ -51,7 +51,10 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-
+  ElogioMotorista: 'ElogioMotorista',
+  ElogioInterno: 'ElogioInterno',
+  OcorrenciaMotorista: 'OcorrenciaMotorista',
+  Settings: 'Settings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -68,4 +71,115 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const ElogioMotoristaScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  nomeMotorista: 'nomeMotorista',
+  carreta: 'carreta',
+  telefone: 'telefone',
+  elogio: 'elogio',
+  tipo: 'tipo',
+  pontos: 'pontos',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  mapsLink: 'mapsLink',
+  userAgent: 'userAgent',
+  cidade: 'cidade',
+  estado: 'estado',
+  tokenAvaliador: 'tokenAvaliador',
+  dataHora: 'dataHora',
+  dataRegistro: 'dataRegistro'
+} as const
+
+export type ElogioMotoristaScalarFieldEnum = (typeof ElogioMotoristaScalarFieldEnum)[keyof typeof ElogioMotoristaScalarFieldEnum]
+
+
+export const ElogioInternoScalarFieldEnum = {
+  id: 'id',
+  matricula: 'matricula',
+  elogio: 'elogio',
+  motorista: 'motorista',
+  telefone: 'telefone',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  mapsLink: 'mapsLink',
+  cidade: 'cidade',
+  estado: 'estado',
+  dataHora: 'dataHora',
+  tokenAvaliador: 'tokenAvaliador',
+  tipo: 'tipo',
+  pontos: 'pontos'
+} as const
+
+export type ElogioInternoScalarFieldEnum = (typeof ElogioInternoScalarFieldEnum)[keyof typeof ElogioInternoScalarFieldEnum]
+
+
+export const OcorrenciaMotoristaScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  carreta: 'carreta',
+  telefone: 'telefone',
+  tipoOcorrencia: 'tipoOcorrencia',
+  descricao: 'descricao',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  mapsLink: 'mapsLink',
+  userAgent: 'userAgent',
+  cidade: 'cidade',
+  estado: 'estado',
+  dataHora: 'dataHora'
+} as const
+
+export type OcorrenciaMotoristaScalarFieldEnum = (typeof OcorrenciaMotoristaScalarFieldEnum)[keyof typeof OcorrenciaMotoristaScalarFieldEnum]
+
+
+export const SettingsScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

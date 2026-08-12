@@ -1,9 +1,92 @@
+// ==========================================
+// ⚠️  AUTO-GERADO. NÃO EDITE ESTE ARQUIVO.
+// Fonte: prisma/schema/*.prisma
+// ==========================================
+
+// ----- 00-generator.prisma -----
 generator client {
   provider     = "prisma-client"
   output       = "../generated/prisma"
   moduleFormat = "cjs"
 }
 
+// ----- 01-datasource.prisma -----
 datasource db {
   provider = "postgresql"
+}
+
+// ----- 10-enums.prisma -----
+
+
+// ----- 20-elogioMotorista.model.prisma -----
+model ElogioMotorista {
+  id              Int      @id @default(autoincrement())
+  nome            String
+  nomeMotorista   String?
+  carreta         String
+  telefone        String?
+  elogio          String
+  tipo            String
+  pontos          Int
+  latitude        Float?
+  longitude       Float?
+  mapsLink        String?
+  userAgent       String?
+  cidade          String?
+  estado          String?
+  tokenAvaliador  String?
+  dataHora        DateTime @default(now())
+  dataRegistro    DateTime? @default(now())
+
+  @@index([carreta, tokenAvaliador, dataHora])
+  @@map("elogios_motoristas")
+}
+
+// ----- 21-elogioInterno.model.prisma -----
+model ElogioInterno {
+  id              Int      @id @default(autoincrement())
+  matricula       String
+  elogio          String
+  motorista       String
+  telefone        String?
+  latitude        Float?
+  longitude       Float?
+  mapsLink        String?
+  cidade          String?
+  estado          String?
+  dataHora        DateTime @default(now())
+  tokenAvaliador  String?
+  tipo            String
+  pontos          Int
+
+  @@index([matricula, tokenAvaliador, dataHora])
+  @@map("elogios_internos")
+}
+
+// ----- 22-ocorrenciaMotorista.model.prisma -----
+model OcorrenciaMotorista {
+  id              Int      @id @default(autoincrement())
+  nome            String
+  carreta         String
+  telefone        String
+  tipoOcorrencia  String
+  descricao       String
+  latitude        Float?
+  longitude       Float?
+  mapsLink        String?
+  userAgent       String?
+  cidade          String?
+  estado          String?
+  dataHora        DateTime @default(now())
+
+  @@map("ocorrencias_motoristas")
+}
+
+// ----- 23-settings.model.prisma -----
+model Settings {
+  key       String   @id @db.VarChar(80)
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
 }

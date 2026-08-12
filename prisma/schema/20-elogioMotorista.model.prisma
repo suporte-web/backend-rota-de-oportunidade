@@ -1,0 +1,22 @@
+model ElogioMotorista {
+  id              Int      @id @default(autoincrement())
+  nome            String
+  nomeMotorista   String?
+  carreta         String
+  telefone        String?
+  elogio          String
+  tipo            String
+  pontos          Int
+  latitude        Float?
+  longitude       Float?
+  mapsLink        String?
+  userAgent       String?
+  cidade          String?
+  estado          String?
+  tokenAvaliador  String?
+  dataHora        DateTime @default(now())
+  dataRegistro    DateTime @default(now())
+
+  @@index([carreta, tokenAvaliador, dataHora])
+  @@map("elogios_motoristas")
+}

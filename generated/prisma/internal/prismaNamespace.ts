@@ -397,7 +397,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-
+  ElogioMotorista: 'ElogioMotorista',
+  ElogioInterno: 'ElogioInterno',
+  OcorrenciaMotorista: 'OcorrenciaMotorista',
+  Settings: 'Settings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -413,10 +416,307 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: never
+    modelProps: "elogioMotorista" | "elogioInterno" | "ocorrenciaMotorista" | "settings"
     txIsolationLevel: TransactionIsolationLevel
   }
-  model: {}
+  model: {
+    ElogioMotorista: {
+      payload: Prisma.$ElogioMotoristaPayload<ExtArgs>
+      fields: Prisma.ElogioMotoristaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ElogioMotoristaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ElogioMotoristaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>
+        }
+        findFirst: {
+          args: Prisma.ElogioMotoristaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ElogioMotoristaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>
+        }
+        findMany: {
+          args: Prisma.ElogioMotoristaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>[]
+        }
+        create: {
+          args: Prisma.ElogioMotoristaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>
+        }
+        createMany: {
+          args: Prisma.ElogioMotoristaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ElogioMotoristaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>[]
+        }
+        delete: {
+          args: Prisma.ElogioMotoristaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>
+        }
+        update: {
+          args: Prisma.ElogioMotoristaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>
+        }
+        deleteMany: {
+          args: Prisma.ElogioMotoristaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ElogioMotoristaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ElogioMotoristaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>[]
+        }
+        upsert: {
+          args: Prisma.ElogioMotoristaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioMotoristaPayload>
+        }
+        aggregate: {
+          args: Prisma.ElogioMotoristaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateElogioMotorista>
+        }
+        groupBy: {
+          args: Prisma.ElogioMotoristaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ElogioMotoristaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ElogioMotoristaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ElogioMotoristaCountAggregateOutputType> | number
+        }
+      }
+    }
+    ElogioInterno: {
+      payload: Prisma.$ElogioInternoPayload<ExtArgs>
+      fields: Prisma.ElogioInternoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ElogioInternoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ElogioInternoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>
+        }
+        findFirst: {
+          args: Prisma.ElogioInternoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ElogioInternoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>
+        }
+        findMany: {
+          args: Prisma.ElogioInternoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>[]
+        }
+        create: {
+          args: Prisma.ElogioInternoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>
+        }
+        createMany: {
+          args: Prisma.ElogioInternoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ElogioInternoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>[]
+        }
+        delete: {
+          args: Prisma.ElogioInternoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>
+        }
+        update: {
+          args: Prisma.ElogioInternoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>
+        }
+        deleteMany: {
+          args: Prisma.ElogioInternoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ElogioInternoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ElogioInternoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>[]
+        }
+        upsert: {
+          args: Prisma.ElogioInternoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ElogioInternoPayload>
+        }
+        aggregate: {
+          args: Prisma.ElogioInternoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateElogioInterno>
+        }
+        groupBy: {
+          args: Prisma.ElogioInternoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ElogioInternoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ElogioInternoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ElogioInternoCountAggregateOutputType> | number
+        }
+      }
+    }
+    OcorrenciaMotorista: {
+      payload: Prisma.$OcorrenciaMotoristaPayload<ExtArgs>
+      fields: Prisma.OcorrenciaMotoristaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OcorrenciaMotoristaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OcorrenciaMotoristaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>
+        }
+        findFirst: {
+          args: Prisma.OcorrenciaMotoristaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OcorrenciaMotoristaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>
+        }
+        findMany: {
+          args: Prisma.OcorrenciaMotoristaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>[]
+        }
+        create: {
+          args: Prisma.OcorrenciaMotoristaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>
+        }
+        createMany: {
+          args: Prisma.OcorrenciaMotoristaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OcorrenciaMotoristaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>[]
+        }
+        delete: {
+          args: Prisma.OcorrenciaMotoristaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>
+        }
+        update: {
+          args: Prisma.OcorrenciaMotoristaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>
+        }
+        deleteMany: {
+          args: Prisma.OcorrenciaMotoristaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OcorrenciaMotoristaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OcorrenciaMotoristaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>[]
+        }
+        upsert: {
+          args: Prisma.OcorrenciaMotoristaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OcorrenciaMotoristaPayload>
+        }
+        aggregate: {
+          args: Prisma.OcorrenciaMotoristaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOcorrenciaMotorista>
+        }
+        groupBy: {
+          args: Prisma.OcorrenciaMotoristaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OcorrenciaMotoristaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OcorrenciaMotoristaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OcorrenciaMotoristaCountAggregateOutputType> | number
+        }
+      }
+    }
+    Settings: {
+      payload: Prisma.$SettingsPayload<ExtArgs>
+      fields: Prisma.SettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.SettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>
+        }
+        findMany: {
+          args: Prisma.SettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>[]
+        }
+        create: {
+          args: Prisma.SettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>
+        }
+        createMany: {
+          args: Prisma.SettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.SettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>
+        }
+        update: {
+          args: Prisma.SettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.SettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.SettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.SettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSettings>
+        }
+        groupBy: {
+          args: Prisma.SettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+  }
 } & {
   other: {
     payload: any
@@ -455,7 +755,191 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const ElogioMotoristaScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  nomeMotorista: 'nomeMotorista',
+  carreta: 'carreta',
+  telefone: 'telefone',
+  elogio: 'elogio',
+  tipo: 'tipo',
+  pontos: 'pontos',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  mapsLink: 'mapsLink',
+  userAgent: 'userAgent',
+  cidade: 'cidade',
+  estado: 'estado',
+  tokenAvaliador: 'tokenAvaliador',
+  dataHora: 'dataHora',
+  dataRegistro: 'dataRegistro'
+} as const
 
+export type ElogioMotoristaScalarFieldEnum = (typeof ElogioMotoristaScalarFieldEnum)[keyof typeof ElogioMotoristaScalarFieldEnum]
+
+
+export const ElogioInternoScalarFieldEnum = {
+  id: 'id',
+  matricula: 'matricula',
+  elogio: 'elogio',
+  motorista: 'motorista',
+  telefone: 'telefone',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  mapsLink: 'mapsLink',
+  cidade: 'cidade',
+  estado: 'estado',
+  dataHora: 'dataHora',
+  tokenAvaliador: 'tokenAvaliador',
+  tipo: 'tipo',
+  pontos: 'pontos'
+} as const
+
+export type ElogioInternoScalarFieldEnum = (typeof ElogioInternoScalarFieldEnum)[keyof typeof ElogioInternoScalarFieldEnum]
+
+
+export const OcorrenciaMotoristaScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  carreta: 'carreta',
+  telefone: 'telefone',
+  tipoOcorrencia: 'tipoOcorrencia',
+  descricao: 'descricao',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  mapsLink: 'mapsLink',
+  userAgent: 'userAgent',
+  cidade: 'cidade',
+  estado: 'estado',
+  dataHora: 'dataHora'
+} as const
+
+export type OcorrenciaMotoristaScalarFieldEnum = (typeof OcorrenciaMotoristaScalarFieldEnum)[keyof typeof OcorrenciaMotoristaScalarFieldEnum]
+
+
+export const SettingsScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+
+/**
+ * Field references
+ */
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'String'
+ */
+export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+/**
+ * Reference to a field of type 'String[]'
+ */
+export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
 
 /**
  * Batch Payload for updateMany & deleteMany & createMany
@@ -607,7 +1091,12 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
  * Learn more about driver adapters: https://pris.ly/d/driver-adapters
  */
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
-export type GlobalOmitConfig = {}
+export type GlobalOmitConfig = {
+  elogioMotorista?: Prisma.ElogioMotoristaOmit
+  elogioInterno?: Prisma.ElogioInternoOmit
+  ocorrenciaMotorista?: Prisma.OcorrenciaMotoristaOmit
+  settings?: Prisma.SettingsOmit
+}
 
 /* Types for Logging */
 export type LogLevel = 'info' | 'query' | 'warn' | 'error'

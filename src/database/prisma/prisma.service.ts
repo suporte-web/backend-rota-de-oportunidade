@@ -1,48 +1,29 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
-import { PrismaClient } from '@prisma/client/extension';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../../../generated/prisma/client';
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  private readonly logger = new Logger(PrismaService.name);
+  constructor() {
+    const connectionString = process.env.DATABASE_URL;
 
-  async onModuleInit(): Promise<void> {
-    try {
-      await this.$connect();
-
-      this.logger.log(
-        'Conexão com o Prisma estabelecida com sucesso.',
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Erro desconhecido';
-
-      this.logger.error(
-        `Erro ao conectar com o Prisma: ${message}`,
-      );
-
-      throw error;
+    if (!connectionString) {
+      throw new Error('DATABASE_URL nao definida.');
     }
+
+    const adapter = new PrismaPg({ connectionString });
+
+    super({ adapter });
   }
 
-  async checkConnection() {
-    return this.$queryRaw<Array<{ ok: number }>>`
-      SELECT 1 AS ok
-    `;
+  async onModuleInit() {
+    await this.$connect();
   }
 
-  async onModuleDestroy(): Promise<void> {
-    this.logger.log('Encerrando conexão com o Prisma...');
-
+  async onModuleDestroy() {
     await this.$disconnect();
   }
 }

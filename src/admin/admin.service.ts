@@ -1,10 +1,11 @@
+import { PrismaService } from '@/database/prisma/prisma.service';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { MysqlParam, MysqlService } from '../database/mysql/mysql.service';
 
 interface UpdateSettingsDto {
   pontosExterno?: number;
   pontosInterno?: number;
   pontosGestao?: number;
+
   weights?: {
     externo?: number;
     interno?: number;
@@ -44,7 +45,7 @@ const defaultWeights = {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly mysqlService: MysqlService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   private normalizeDate(value?: unknown, endOfDay = false): string | null {
     if (!value) {
@@ -80,49 +81,37 @@ export class AdminService {
     return Math.max(Math.trunc(parsed), 0);
   }
 
-  async ensureAdminTables(): Promise<void> {
-    await this.mysqlService.query(`
-      CREATE TABLE IF NOT EXISTS settings (
-        \`key\` VARCHAR(80) NOT NULL PRIMARY KEY,
-        \`value\` VARCHAR(255) NOT NULL,
-        updated_at TIMESTAMP NOT NULL
-          DEFAULT CURRENT_TIMESTAMP
-          ON UPDATE CURRENT_TIMESTAMP
-      )
-      ENGINE=InnoDB
-      DEFAULT CHARSET=utf8mb4
-      COLLATE=utf8mb4_unicode_ci
-    `);
-
-    await this.mysqlService.query(
-      `
-        INSERT IGNORE INTO settings (\`key\`, \`value\`)
-        VALUES (?, ?)
-      `,
-      ['weights', JSON.stringify(defaultWeights)],
-    );
+  async ensureDefaultSettings(): Promise<void> {
+    await this.prismaService.settings.upsert({
+      where: {
+        key: 'weights',
+      },
+      update: {},
+      create: {
+        key: 'weights',
+        value: defaultWeights,
+      },
+    });
   }
 
   async getSettings() {
-    await this.ensureAdminTables();
+    await this.ensureDefaultSettings();
 
-    const row: any = await this.mysqlService.query(
-      `
-      SELECT \`key\`, \`value\`
-      FROM settings
-      WHERE \`key\` = ?
-      LIMIT 1
-    `,
-      ['weights'],
-    );
+    const row = await this.prismaService.settings.findUnique({
+      where: {
+        key: 'weights',
+      },
+    });
 
     let weights = { ...defaultWeights };
 
     try {
-      const value = row?.[0]?.value;
+      const value = row?.value;
 
       const parsed =
-        typeof value === 'string' ? JSON.parse(value || '{}') : value || {};
+        value && typeof value === 'object'
+          ? (value as Record<string, unknown>)
+          : {};
 
       const interno = Number(parsed.interno);
       const gestao = Number(parsed.gestao);
@@ -155,7 +144,7 @@ export class AdminService {
   }
 
   async updateSettings(data: UpdateSettingsDto) {
-    await this.ensureAdminTables();
+    await this.ensureDefaultSettings();
 
     const settingsAtuais = await this.getSettings();
 
@@ -198,25 +187,21 @@ export class AdminService {
       externo: Math.trunc(externo),
     };
 
-    const result = await this.mysqlService.query(
-      `
-    INSERT INTO settings (\`key\`, \`value\`)
-    VALUES (?, ?)
-    ON DUPLICATE KEY UPDATE
-      \`value\` = VALUES(\`value\`)
-  `,
-      ['weights', JSON.stringify(weights)],
-    );
-
-    console.log(result);
+    await this.prismaService.settings.upsert({
+      where: {
+        key: 'weights',
+      },
+      update: {
+        value: weights,
+      },
+      create: {
+        key: 'weights',
+        value: weights,
+      },
+    });
 
     Logger.log(
       `Configurações atualizadas: ${JSON.stringify(weights)}`,
-      AdminService.name,
-    );
-
-    Logger.debug(
-      `Resultado do MySQL: ${JSON.stringify(result)}`,
       AdminService.name,
     );
 
@@ -228,129 +213,162 @@ export class AdminService {
     };
   }
 
-  private buildWhere(filters: any = {}): {
-    clause: string;
-    params: MysqlParam[];
-  } {
-    const params: MysqlParam[] = [];
-    const where: string[] = [];
+  async listVotes(filters: any = {}): Promise<ListVotesResponse> {
+    const limit = this.normalizeLimit(filters.limit, 100);
+    const offset = this.normalizeOffset(filters.offset);
 
     const from = this.normalizeDate(filters.from);
     const to = this.normalizeDate(filters.to, true);
     const q = String(filters.q || '').trim();
 
-    if (from) {
-      where.push('data_hora >= ?');
-      params.push(from);
-    }
+    const dateFilter =
+      from || to
+        ? {
+            dataHora: {
+              ...(from ? { gte: new Date(from) } : {}),
+              ...(to ? { lte: new Date(to) } : {}),
+            },
+          }
+        : {};
 
-    if (to) {
-      where.push('data_hora <= ?');
-      params.push(to);
-    }
+    const buscarInternos = !filters.tipo || filters.tipo === 'interno';
 
-    if (filters.tipo === 'interno' || filters.tipo === 'externo') {
-      where.push('origem = ?');
-      params.push(filters.tipo);
-    }
+    const buscarExternos = !filters.tipo || filters.tipo === 'externo';
 
-    if (q) {
-      where.push(`
-      (
-        avaliado LIKE ?
-        OR avaliador LIKE ?
-        OR identificador LIKE ?
-        OR cidade LIKE ?
-        OR estado LIKE ?
-      )
-    `);
+    const [internos, externos] = await Promise.all([
+      buscarInternos
+        ? this.prismaService.elogioInterno.findMany({
+            where: {
+              ...dateFilter,
 
-      const like = `%${q}%`;
+              ...(q
+                ? {
+                    OR: [
+                      {
+                        motorista: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        matricula: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        cidade: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        estado: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                    ],
+                  }
+                : {}),
+            },
+          })
+        : Promise.resolve([]),
 
-      params.push(like, like, like, like, like);
-    }
+      buscarExternos
+        ? this.prismaService.elogioMotorista.findMany({
+            where: {
+              ...dateFilter,
 
-    return {
-      clause: where.length ? `WHERE ${where.join(' AND ')}` : '',
-      params,
-    };
-  }
-
-  private unionVotesSql(): string {
-    return `
-      SELECT
-        'externo' AS origem,
-        id,
-        COALESCE(NULLIF(nome_motorista, ''), carreta) AS avaliado,
-        carreta AS identificador,
-        nome AS avaliador,
-        telefone,
-        elogio AS comentario,
-        pontos,
-        latitude,
-        longitude,
-        maps_link,
-        cidade,
-        estado,
-        data_hora
-      FROM elogios_motoristas
-
-      UNION ALL
-
-      SELECT
-        'interno' AS origem,
-        id,
-        motorista AS avaliado,
-        matricula AS identificador,
-        NULL AS avaliador,
-        telefone,
-        elogio AS comentario,
-        pontos,
-        latitude,
-        longitude,
-        maps_link,
-        cidade,
-        estado,
-        data_hora
-      FROM elogios_internos
-    `;
-  }
-
-  async listVotes(filters: any = {}): Promise<ListVotesResponse> {
-    const limit = this.normalizeLimit(filters.limit, 100);
-    const offset = this.normalizeOffset(filters.offset);
-    const built = this.buildWhere(filters);
-
-    const parametrosFiltros = built.params ?? [];
-
-    const [rowsResult, countResult]: any = await Promise.all([
-      this.mysqlService.query(
-        `
-        SELECT *
-        FROM (${this.unionVotesSql()}) votos
-        ${built.clause}
-        ORDER BY data_hora DESC
-        LIMIT ? OFFSET ?
-      `,
-        [...parametrosFiltros, limit, offset],
-      ),
-
-      this.mysqlService.query(
-        `
-        SELECT COUNT(*) AS total
-        FROM (${this.unionVotesSql()}) votos
-        ${built.clause}
-        `,
-        parametrosFiltros,
-      ),
+              ...(q
+                ? {
+                    OR: [
+                      {
+                        nomeMotorista: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        nome: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        carreta: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        cidade: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                      {
+                        estado: {
+                          contains: q,
+                          mode: 'insensitive',
+                        },
+                      },
+                    ],
+                  }
+                : {}),
+            },
+          })
+        : Promise.resolve([]),
     ]);
 
-    // const rows = rowsResult?.[0] ?? [];
-    const countRows = countResult?.[0] ?? [];
+    const votosInternos = internos.map<VoteRow>((item) => ({
+      origem: 'interno' as const,
+      id: item.id,
+      avaliado: item.motorista,
+      identificador: item.matricula,
+      avaliador: null,
+      telefone: item.telefone,
+      comentario: item.elogio,
+      pontos: item.pontos,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      maps_link: item.mapsLink,
+      cidade: item.cidade,
+      estado: item.estado,
+      data_hora: item.dataHora,
+    }));
+
+    const votosExternos = externos.map<VoteRow>((item) => ({
+      origem: 'externo' as const,
+      id: item.id,
+
+      avaliado: item.nomeMotorista?.trim() || item.carreta,
+
+      identificador: item.carreta,
+      avaliador: item.nome,
+      telefone: item.telefone,
+      comentario: item.elogio,
+      pontos: item.pontos,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      maps_link: item.mapsLink,
+      cidade: item.cidade,
+      estado: item.estado,
+      data_hora: item.dataHora,
+    }));
+
+    const todos: VoteRow[] = [...votosInternos, ...votosExternos].sort(
+      (a, b) =>
+        new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime(),
+    );
+
+    const total = todos.length;
+
+    const result = todos.slice(offset, offset + limit);
 
     return {
-      result: rowsResult as VoteRow[],
-      total: Number(countRows.total ?? 0),
+      result,
+      total,
       limit,
       offset,
     };

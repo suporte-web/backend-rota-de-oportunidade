@@ -6,8 +6,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ElogiosService } from './elogios.service';
 import { ApiTags } from '@nestjs/swagger';
+
+import { ElogiosService } from './elogios.service';
 
 @ApiTags('Elogios')
 @Controller('elogios')
@@ -20,7 +21,9 @@ export class ElogiosController {
   criarElogioPublico(
     @Headers('x-avaliador-token')
     tokenAvaliador: string | undefined,
-    @Body() data: any,
+
+    @Body()
+    data: any,
   ) {
     return this.elogiosService.criarElogioPublico(
       data,
@@ -30,15 +33,19 @@ export class ElogiosController {
 
   @Post('ocorrencia')
   criarOcorrencia(
-    @Body() data: any,
+    @Body()
+    data: any,
   ) {
     return this.elogiosService.criarOcorrencia(data);
   }
 
   @Get('motoristas-ativos')
   listarMotoristas(
-    @Query('q') pesquisa?: string,
-    @Query('limit') limit?: string,
+    @Query('q')
+    pesquisa?: string,
+
+    @Query('limit')
+    limit?: string,
   ) {
     return this.elogiosService.listarMotoristas(
       pesquisa,
@@ -48,8 +55,11 @@ export class ElogiosController {
 
   @Get('carretas-ativas')
   listarCarretas(
-    @Query('q') pesquisa?: string,
-    @Query('limit') limit?: string,
+    @Query('q')
+    pesquisa?: string,
+
+    @Query('limit')
+    limit?: string,
   ) {
     return this.elogiosService.listarCarretas(
       pesquisa,
@@ -61,7 +71,9 @@ export class ElogiosController {
   criarElogioInterno(
     @Headers('x-avaliador-token')
     tokenAvaliador: string | undefined,
-    @Body() data: any,
+
+    @Body()
+    data: any,
   ) {
     return this.elogiosService.criarElogioInterno(
       data,

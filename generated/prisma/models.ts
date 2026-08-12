@@ -8,4 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/ElogioMotorista.js'
+export type * from './models/ElogioInterno.js'
+export type * from './models/OcorrenciaMotorista.js'
+export type * from './models/Settings.js'
 export type * from './commonInputTypes.js'

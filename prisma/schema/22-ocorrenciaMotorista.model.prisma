@@ -1,0 +1,17 @@
+model OcorrenciaMotorista {
+  id              Int      @id @default(autoincrement())
+  nome            String
+  carreta         String
+  telefone        String
+  tipoOcorrencia  String
+  descricao       String
+  latitude        Float?
+  longitude       Float?
+  mapsLink        String?
+  userAgent       String?
+  cidade          String?
+  estado          String?
+  dataHora        DateTime @default(now())
+
+  @@map("ocorrencias_motoristas")
+}

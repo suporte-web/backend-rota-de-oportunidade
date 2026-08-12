@@ -1,319 +1,339 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  Logger,
-  NotFoundException,
-  ServiceUnavailableException,
-} from '@nestjs/common';
-import { GeoService } from '../common/services/geo.service';
-import { TextService } from '../common/services/text.service';
-import { ElogiosRepository } from './elogios.repository';
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '@/database/prisma/prisma.service';
+import { AdminService } from '../admin/admin.service';
 import { KmmService } from '@/kmm/kmm.service';
+
+type Coordenada = string | number | null | undefined;
+
+interface PublicPraiseData {
+  nome: string;
+  nomeMotorista: string | null;
+  carreta: string;
+  telefone: string;
+  elogio: string;
+  latitude: Coordenada;
+  longitude: Coordenada;
+  mapsLink: string | null;
+  userAgent?: string;
+  cidade: string | null;
+  estado: string | null;
+  tokenAvaliador: string;
+}
+
+interface InternalPraiseData {
+  matricula: string;
+  elogio: string;
+  motorista: string;
+  telefone: string;
+  latitude: Coordenada;
+  longitude: Coordenada;
+  mapsLink: string | null;
+  cidade: string | null;
+  estado: string | null;
+  dataHora?: string | Date;
+  tokenAvaliador: string;
+}
+
+interface OccurrenceData {
+  nome: string;
+  carreta: string;
+  telefone: string;
+  tipoOcorrencia: string;
+  descricao: string;
+  latitude: Coordenada;
+  longitude: Coordenada;
+  mapsLink: string | null;
+  userAgent?: string;
+  cidade: string | null;
+  estado: string | null;
+}
 
 @Injectable()
 export class ElogiosService {
-  private readonly logger = new Logger(ElogiosService.name);
-
   constructor(
-    private readonly elogiosRepository: ElogiosRepository,
-    private readonly geoService: GeoService,
+    private readonly prismaService: PrismaService,
+    private readonly adminService: AdminService,
     private readonly kmmService: KmmService,
-    private readonly textService: TextService,
   ) {}
 
-  private hasLocation(latitude: unknown, longitude: unknown): boolean {
-    return (
-      latitude !== undefined &&
-      latitude !== null &&
-      latitude !== '' &&
-      longitude !== undefined &&
-      longitude !== null &&
-      longitude !== ''
+  private normalizeDate(
+    value: string | Date,
+  ): Date {
+    if (value instanceof Date) {
+      return value;
+    }
+
+    return new Date(
+      `${String(value).replace(' ', 'T')}-03:00`,
     );
   }
 
-  private buildMapsLink(
-    latitude: unknown,
-    longitude: unknown,
-    mapsLink?: string,
-  ): string | null {
-    if (mapsLink) {
-      return mapsLink;
-    }
-
-    if (!this.hasLocation(latitude, longitude)) {
+  private normalizeCoordinate(
+    value: Coordenada,
+  ): number | null {
+    if (
+      value === undefined ||
+      value === null ||
+      value === ''
+    ) {
       return null;
     }
 
-    return `https://maps.google.com/?q=${latitude},${longitude}`;
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed)
+      ? parsed
+      : null;
   }
 
-  private normalizeToken(token?: string): string {
-    return String(token || '')
-      .trim()
-      .toLowerCase();
+  private async getPointValue(
+    type: 'interno' | 'externo',
+  ): Promise<number> {
+    const settings =
+      await this.adminService.getSettings();
+
+    return type === 'interno'
+      ? settings.pontosInterno
+      : settings.pontosExterno;
   }
 
-  private getSevenDaysAgo(): Date {
-    const date = new Date();
+  private async hasRecentPublicVote(
+    carreta: string,
+    token: string,
+    limite: Date,
+  ): Promise<boolean> {
+    const vote =
+      await this.prismaService.elogioMotorista.findFirst({
+        where: {
+          carreta,
+          tokenAvaliador: token,
+          dataHora: {
+            gte: limite,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
 
-    date.setDate(date.getDate() - 7);
-
-    return date;
+    return Boolean(vote);
   }
 
-  async criarElogioPublico(data: any, tokenHeader?: string) {
-    const tokenAvaliador = this.normalizeToken(tokenHeader);
+  private async hasRecentInternalVote(
+    matricula: string,
+    token: string,
+    limite: Date,
+  ): Promise<boolean> {
+    const vote =
+      await this.prismaService.elogioInterno.findFirst({
+        where: {
+          matricula,
+          tokenAvaliador: token,
+          dataHora: {
+            gte: limite,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
 
-    if (!tokenAvaliador) {
-      throw new BadRequestException('Token do avaliador nao informado.');
-    }
+    return Boolean(vote);
+  }
 
-    if (!data.nome || !data.carreta || !data.telefone || !data.elogio) {
-      throw new BadRequestException('Campos obrigatorios nao preenchidos.');
-    }
+  async criarElogioPublico(
+    data: PublicPraiseData,
+    tokenAvaliador?: string,
+  ) {
+    const token =
+      String(tokenAvaliador || '')
+        .trim()
+        .toLowerCase();
 
-    if (!this.hasLocation(data.latitude, data.longitude)) {
-      throw new BadRequestException(
-        'Localizacao obrigatoria. Permita o acesso a localizacao do celular para enviar.',
-      );
-    }
+    const pontos =
+      await this.getPointValue('externo');
 
-    const carreta = this.textService.normalizaCarreta(data.carreta);
+    return this.prismaService.elogioMotorista.create({
+      data: {
+        nome: data.nome,
+        nomeMotorista:
+          data.nomeMotorista || null,
+        carreta: data.carreta,
+        telefone: data.telefone,
+        elogio: data.elogio,
+        tipo: 'Externo',
+        pontos,
 
-    const existeCarreta =
-      await this.kmmService.existeCarretaAtivaNoKMM(carreta);
+        latitude:
+          this.normalizeCoordinate(
+            data.latitude,
+          ),
 
-    if (!existeCarreta) {
-      throw new NotFoundException('Carreta nao encontrada ou inativa.');
-    }
+        longitude:
+          this.normalizeCoordinate(
+            data.longitude,
+          ),
 
-    let nomeMotorista = data.nome_motorista?.trim() || null;
+        mapsLink: data.mapsLink,
 
-    if (!nomeMotorista) {
-      nomeMotorista = await this.kmmService.getMotoristaPorCarreta(carreta);
-    }
+        userAgent:
+          data.userAgent || null,
 
-    const existeElogio = await this.elogiosRepository.hasRecentPublicVote(
-      carreta,
-      tokenAvaliador,
-      this.getSevenDaysAgo(),
-    );
+        cidade:
+          data.cidade || null,
 
-    if (existeElogio) {
-      throw new ConflictException(
-        'Voce ja elogiou esta carreta nos ultimos 7 dias.',
-      );
-    }
+        estado:
+          data.estado || null,
 
-    const localizacao = await this.geoService.getCidadeEstado(
-      data.latitude,
-      data.longitude,
-    );
-
-    const result = await this.elogiosRepository.createPublicPraise({
-      nome: data.nome.trim(),
-      nomeMotorista,
-      carreta,
-      telefone: data.telefone.trim(),
-      elogio: data.elogio.trim(),
-      latitude: data.latitude,
-      longitude: data.longitude,
-      mapsLink: this.buildMapsLink(
-        data.latitude,
-        data.longitude,
-        data.maps_link,
-      ),
-      userAgent: data.user_agent,
-      cidade: localizacao.cidade,
-      estado: localizacao.estado,
-      tokenAvaliador,
+        tokenAvaliador:
+          token || data.tokenAvaliador,
+      },
     });
-
-    return {
-      status: 'sucesso',
-      mensagem: 'Elogio salvo com sucesso!',
-      id: result.insertId,
-    };
   }
 
-  async criarOcorrencia(data: any) {
-    if (
-      !data.nome ||
-      !data.carreta ||
-      !data.telefone ||
-      !data.tipo_ocorrencia ||
-      !data.descricao
-    ) {
-      throw new BadRequestException('Campos obrigatorios nao preenchidos.');
-    }
+  async criarOcorrencia(
+    data: OccurrenceData,
+  ) {
+    return this.prismaService.ocorrenciaMotorista.create({
+      data: {
+        nome: data.nome,
+        carreta: data.carreta,
+        telefone: data.telefone,
 
-    if (!this.hasLocation(data.latitude, data.longitude)) {
-      throw new BadRequestException(
-        'Localizacao obrigatoria. Permita o acesso a localizacao do celular para enviar.',
-      );
-    }
+        tipoOcorrencia:
+          data.tipoOcorrencia,
 
-    const carreta = this.textService.normalizaCarreta(data.carreta);
+        descricao:
+          data.descricao,
 
-    const existeCarreta =
-      await this.kmmService.existeCarretaAtivaNoKMM(carreta);
+        latitude:
+          this.normalizeCoordinate(
+            data.latitude,
+          ),
 
-    if (!existeCarreta) {
-      throw new NotFoundException('Placa nao encontrada no KMM.');
-    }
+        longitude:
+          this.normalizeCoordinate(
+            data.longitude,
+          ),
 
-    const localizacao = await this.geoService.getCidadeEstado(
-      data.latitude,
-      data.longitude,
-    );
+        mapsLink:
+          data.mapsLink,
 
-    const result = await this.elogiosRepository.createOccurrence({
-      nome: data.nome.trim(),
-      carreta,
-      telefone: data.telefone.trim(),
-      tipoOcorrencia: data.tipo_ocorrencia.trim(),
-      descricao: data.descricao.trim(),
-      latitude: data.latitude,
-      longitude: data.longitude,
-      mapsLink: this.buildMapsLink(
-        data.latitude,
-        data.longitude,
-        data.maps_link,
-      ),
-      userAgent: data.user_agent,
-      cidade: localizacao.cidade,
-      estado: localizacao.estado,
+        userAgent:
+          data.userAgent || null,
+
+        cidade:
+          data.cidade || null,
+
+        estado:
+          data.estado || null,
+      },
     });
-
-    return {
-      status: 'sucesso',
-      mensagem: 'Ocorrencia salva!',
-      id: result.insertId,
-    };
   }
 
-  async listarMotoristas(pesquisa = '', limit?: string) {
-    const limitNumber = Number.parseInt(String(limit || ''), 10);
-    
+  async listarMotoristas(
+    pesquisa = '',
+    limit?: string,
+  ) {
+    const limitNumber =
+      Number.parseInt(
+        String(limit || ''),
+        10,
+      );
+
     return this.kmmService.listarMotoristasAtivos(
       pesquisa || '',
-      Number.isFinite(limitNumber) ? limitNumber : undefined,
+      Number.isFinite(limitNumber)
+        ? limitNumber
+        : undefined,
     );
   }
 
-  async listarCarretas(pesquisa = '', limit?: string) {
-    const limitNumber = Number.parseInt(String(limit || ''), 10);
+  async listarCarretas(
+    pesquisa = '',
+    limit?: string,
+  ) {
+    const limitNumber =
+      Number.parseInt(
+        String(limit || ''),
+        10,
+      );
 
-    const rows = await this.kmmService.listarCarretasAtivas(
-      pesquisa || '',
-      Number.isFinite(limitNumber) ? limitNumber : undefined,
-    );
+    const rows =
+      await this.kmmService.listarCarretasAtivas(
+        pesquisa || '',
+        Number.isFinite(limitNumber)
+          ? limitNumber
+          : undefined,
+      );
 
     return rows.map((row) => ({
       carreta: row.carreta,
     }));
   }
 
-  async criarElogioInterno(data: any, tokenHeader?: string) {
-    const tokenAvaliador = this.normalizeToken(tokenHeader);
+  async criarElogioInterno(
+    data: InternalPraiseData,
+    tokenAvaliador?: string,
+  ) {
+    const token =
+      String(tokenAvaliador || '')
+        .trim()
+        .toLowerCase();
 
-    if (!tokenAvaliador) {
-      throw new BadRequestException('Token do avaliador nao informado.');
-    }
+    const pontos =
+      await this.getPointValue('interno');
 
-    if (!data.matricula || !data.elogio || !data.autor || !data.telefone) {
-      throw new BadRequestException('Todos os campos sao obrigatorios.');
-    }
+    const dataHora =
+      data.dataHora
+        ? this.normalizeDate(
+            data.dataHora,
+          )
+        : new Date();
 
-    if (!this.hasLocation(data.latitude, data.longitude)) {
-      throw new BadRequestException(
-        'Localizacao obrigatoria. Permita o acesso a localizacao do celular para enviar.',
-      );
-    }
+    return this.prismaService.elogioInterno.create({
+      data: {
+        matricula:
+          data.matricula,
 
-    const matricula = this.textService.onlyDigits(data.matricula);
+        elogio:
+          data.elogio,
 
-    if (!matricula) {
-      throw new BadRequestException('Matricula invalida.');
-    }
+        motorista:
+          data.motorista,
 
-    const telefone = this.textService.onlyDigits(data.telefone);
+        telefone:
+          data.telefone,
 
-    if (!/^\d{10,11}$/.test(telefone)) {
-      throw new BadRequestException(
-        'Telefone invalido. Use apenas numeros com DDD (10 ou 11 digitos).',
-      );
-    }
+        latitude:
+          this.normalizeCoordinate(
+            data.latitude,
+          ),
 
-    const existeElogio = await this.elogiosRepository.hasRecentInternalVote(
-      matricula,
-      tokenAvaliador,
-      this.getSevenDaysAgo(),
-    );
+        longitude:
+          this.normalizeCoordinate(
+            data.longitude,
+          ),
 
-    if (existeElogio) {
-      throw new BadRequestException(
-        'Voce ja enviou um elogio para este motorista nos ultimos 7 dias.',
-      );
-    }
+        mapsLink:
+          data.mapsLink,
 
-    let motorista: string | null = null;
+        cidade:
+          data.cidade || null,
 
-    try {
-      motorista = await this.kmmService.getNomeMotoristaPorMatricula(matricula);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido';
+        estado:
+          data.estado || null,
 
-      this.logger.warn(
-        `[KMM] indisponivel na busca por matricula: ${message}. Matricula: ${matricula}`,
-      );
+        dataHora,
 
-      throw new ServiceUnavailableException({
-        status: 'erro',
-        mensagem:
-          'Nao foi possivel validar a matricula no KMM. Tente novamente.',
-      });
-    }
+        tokenAvaliador:
+          token || data.tokenAvaliador,
 
-    if (!motorista) {
-      throw new NotFoundException({
-        status: 'erro',
-        mensagem: 'Matricula nao encontrada como motorista ativo no KMM.',
-      });
-    }
+        tipo: 'Interno',
 
-    const localizacao = await this.geoService.getCidadeEstado(
-      data.latitude,
-      data.longitude,
-    );
-
-    const result = await this.elogiosRepository.createInternalPraise({
-      matricula,
-      elogio: data.elogio.trim(),
-      motorista,
-      telefone,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      mapsLink: this.buildMapsLink(
-        data.latitude,
-        data.longitude,
-        data.maps_link,
-      ),
-      cidade: localizacao.cidade,
-      estado: localizacao.estado,
-      dataHora: this.textService.getDataAtual(),
-      tokenAvaliador,
+        pontos,
+      },
     });
-
-    const id = result.insertId;
-
-    this.logger.log(
-      `[Elogio interno] inserido. ID: ${id}. Matricula: ${matricula}`,
-    );
-
-    return id;
   }
 }
