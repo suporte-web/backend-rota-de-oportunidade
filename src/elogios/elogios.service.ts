@@ -291,6 +291,21 @@ export class ElogiosService {
       .trim()
       .toLowerCase();
 
+      console.log(token);
+      
+
+    if (!token) {
+      throw new BadRequestException(
+        'Não foi possível identificar o avaliador.',
+      );
+    }
+
+    const matricula = String(data.matricula || '').trim();
+
+    if (!matricula) {
+      throw new BadRequestException('Matrícula não informada.');
+    }
+
     const pontos = await this.getPointValue('interno');
 
     const dataHora = data.dataHora
@@ -307,50 +322,65 @@ export class ElogiosService {
     const limite = new Date();
     limite.setDate(limite.getDate() - 7);
 
-    if (token) {
-      const jaVotou = await this.hasRecentInternalVote(
-        data.matricula,
-        token,
-        limite,
-      );
+    return this.prismaService.$transaction(async (tx) => {
+      const lockKey = `elogio-interno:${matricula}:${token}`;
+
+      await tx.$executeRaw`
+      SELECT pg_advisory_xact_lock(
+        hashtext(${lockKey})
+      )
+    `;
+
+      const jaVotou = await tx.elogioInterno.findFirst({
+        where: {
+          matricula,
+          tokenAvaliador: token,
+          dataHora: {
+            gte: limite,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
 
       if (jaVotou) {
         throw new BadRequestException(
           'Você já registrou um elogio para este motorista nos últimos 7 dias.',
         );
       }
-    }
 
-    return this.prismaService.elogioInterno.create({
-      data: {
-        matricula: data.matricula,
+      return tx.elogioInterno.create({
+        data: {
+          matricula,
 
-        elogio: data.elogio,
+          elogio: data.elogio,
 
-        motorista: data.motorista,
+          motorista: data.motorista,
 
-        telefone: data.telefone,
+          telefone: data.telefone,
 
-        latitude: localizacao.latitude,
+          latitude: localizacao.latitude,
 
-        longitude: localizacao.longitude,
+          longitude: localizacao.longitude,
 
-        mapsLink: data.mapsLink || null,
+          mapsLink: data.mapsLink || null,
 
-        cidade: localizacao.cidade,
+          cidade: localizacao.cidade,
 
-        estado: localizacao.estado,
+          estado: localizacao.estado,
 
-        dataHora,
+          dataHora,
 
-        tokenAvaliador: token || data.tokenAvaliador,
+          tokenAvaliador: token,
 
-        tipo: 'Interno',
+          tipo: 'Interno',
 
-        pontos,
+          pontos,
 
-        autor: data.autor,
-      },
+          autor: data.autor,
+        },
+      });
     });
   }
 }
